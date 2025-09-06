@@ -4,11 +4,25 @@ let LoadLesson = () => {
         .then((json) => displayData(json.data))
 }
 
+
 let loadLevelWords = (id) => {
+    manageSpinner(true);
     let url = `https://openapi.programming-hero.com/api/level/${id}`;
     fetch(url)
         .then((res) => res.json())
-        .then((json) => displayWord(json.data))
+        .then((json) => {
+            removeClass();
+            let lessonBtn = document.getElementById(`lesson-btn-${id}`);
+            lessonBtn.classList.add("active");
+            displayWord(json.data)
+        })
+}
+
+let removeClass = () => {
+    let removeActiveClass = document.querySelectorAll(".lesson-btn");
+    removeActiveClass.forEach((btn) => {
+        btn.classList.remove("active");
+    })
 }
 let displayWord = (words) => {
     let wordContainer = document.getElementById("word-container");
@@ -21,6 +35,8 @@ let displayWord = (words) => {
             <p>Next Lesson এ যান</p>
         </div>
         `;
+        manageSpinner(false)
+        return;
     }
     words.forEach((word) => {
         let wordCards = document.createElement("div");
@@ -31,14 +47,15 @@ let displayWord = (words) => {
                 <h2 class="font-medium text-2xl">${word.meaning ? word.meaning : "অর্থ পাওয়া যায় নি"} / ${word.pronunciation ? word.pronunciation : "Pronounciation পাওয়া যায় নি"}</h2>
 
                 <div class="flex justify-between items-center mt-10">
-                <button class="btn"><i class="fa-solid fa-circle-info"></i></button>
-                <button class="btn"><i class="fa-solid fa-volume-high"></i></button>
+                <button onclick="loadWordDetail(${word.id})" class="btn"><i class="fa-solid fa-circle-info"></i></button>
+                <button onclick="pronounceWord('${word.word}')" class="btn"><i class="fa-solid fa-volume-high"></i></button>
                 </div>
             </div>
         `;
 
         wordContainer.appendChild(wordCards);
     })
+    manageSpinner(false);
 }
 
 let displayData = (lessons) => {
@@ -47,10 +64,79 @@ let displayData = (lessons) => {
     lessons.forEach((lesson) => {
         let btn = document.createElement("div");
         btn.innerHTML = `
-        <button onclick="loadLevelWords(${lesson.level_no})" class="btn btn-outline btn-primary"><i class="fa-solid fa-book-open"></i>Lesson- ${lesson.level_no}</button>
+        <button id="lesson-btn-${lesson.level_no}" onclick="loadLevelWords(${lesson.level_no})" class="btn btn-outline btn-primary lesson-btn"><i class="fa-solid fa-book-open"></i>Lesson- ${lesson.level_no}</button>
         `;
         lessonContainer.appendChild(btn);
 
     })
 }
+
+let loadWordDetail = async (id) => {
+    let url = `https://openapi.programming-hero.com/api/word/${id}`;
+    let res = await fetch(url);
+    let details = await res.json();
+    displayWordDetails(details.data);
+}
+
+const createElements = (arr) => {
+    const htmlElements = arr.map((el) => `<span class="btn">${el}</span>`);
+    return htmlElements.join(" ");
+};
+
+let displayWordDetails = (words) => {
+    let wordDetails = document.getElementById("details-Container");
+
+    wordDetails.innerHTML = `
+          <div class="">
+            <h2 class="text-2xl font-bold">${words.word}(<i class="fa-solid fa-microphone-lines"></i> :${words.pronunciation})</h2>
+          </div>
+          <div class="">
+            <h2 class="font-bold">Meaning</h2>
+            <p>${words.meaning}</p>
+          </div>
+          <div class="">
+            <h2 class="font-bold">Example</h2>
+            <p>${words.sentence}</p>
+          </div>
+          <div class="">
+            <h2 class="font-bold">Synonym</h2>
+            <div class="">${createElements(words.synonyms)}
+          </div>
+    
+    
+    `;
+    document.getElementById("my_modal_5").showModal();
+
+}
+
+let manageSpinner = (status) => {
+    if (status == true) {
+        document.getElementById("spinner").classList.remove("hidden")
+        document.getElementById("word-container").classList.add("hidden")
+    }
+    else {
+        document.getElementById("word-container").classList.remove("hidden")
+        document.getElementById("spinner").classList.add("hidden")
+    }
+}
+
+function pronounceWord(word) {
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = "en-EN"; // English
+    window.speechSynthesis.speak(utterance);
+}
 LoadLesson();
+
+document.getElementById("btn-search").addEventListener("click", () => {
+    removeClass();
+    let input = document.getElementById("input-search")
+    let searchWord = input.value.trim().toLowerCase();
+    fetch("https://openapi.programming-hero.com/api/words/all")
+        .then(res => res.json())
+        .then(data => {
+            let allWords = data.data;
+            let filterWords = allWords.filter(word => word.word.toLowerCase().includes(searchWord))
+            displayWord(filterWords);
+        })
+})
+

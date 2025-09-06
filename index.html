@@ -97,6 +97,21 @@
 
     </div>
 
+    <div class="join flex justify-center items-center mt-10">
+      <div>
+        <label class="input validator join-item">
+
+          <input id="input-search" type="email" placeholder="Enter word" required />
+        </label>
+
+      </div>
+      <button id="btn-search" class="btn btn-primary join-item">Search</button>
+    </div>
+
+    <div id="spinner" class="flex justify-center items-center py-16 hidden">
+      <span class="loading loading-ring loading-xl"></span>
+    </div>
+
     <div id="word-container" class="bg-gray-100 p-10 w-11/12 mx-auto mt-10 grid grid-cols-3 gap-5 rounded-xl ">
       <div class="text-center bg-blue-100 col-span-full rounded-xl py-5">
         <p class="text-gray-500 mb-5 font-bangla">এখনো কোনো Lesson লেসন সিলেক্ট করেন নি</p>
@@ -107,10 +122,23 @@
   </main>
 
 
+  <!-- Open the modal using ID.showModal() method -->
+  <!-- <button class="btn" onclick="my_modal_5.showModal()">open modal</button> -->
+  <dialog id="my_modal_5" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box">
+      <div id="details-Container">
+
+      </div>
+      <div class="modal-action">
+        <form method="dialog">
+          <!-- if there is a button in form, it will close the modal -->
+          <button class="btn">Close</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
   <script src="index.js"></script>
 </body>
 
 </html>
-
-
-
